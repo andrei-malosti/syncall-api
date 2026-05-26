@@ -1,6 +1,5 @@
 package com.syncall.api.model.entity;
 
-import com.syncall.api.model.Address;
 import com.syncall.api.model.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -29,14 +29,14 @@ public class User {
 	
 	@Column(nullable = false)
 	private String name;
-	
-	@Embedded
-	private Address address;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private Role role;
 
 	@ManyToMany(mappedBy = "users")
-	private ArrayList<Ticket> tickets = new ArrayList<>();
+	private List<Ticket> tickets = new ArrayList<>();
+
+	@ManyToOne
+	private Company company;
 }
