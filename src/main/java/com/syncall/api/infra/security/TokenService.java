@@ -11,9 +11,6 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +30,7 @@ public class TokenService {
                 .expiresAt(Instant.now().plusSeconds(3600*6))
                 .subject(userDetails.getUsername())
                 .claim("companyId", userDetails.getCompanyId())
+                .claim("userId", userDetails.getUserId())
                 .claim("scope", scope)
                 .build();
 

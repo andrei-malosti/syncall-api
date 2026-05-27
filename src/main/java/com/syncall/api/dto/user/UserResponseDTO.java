@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserResponseDTO {
 
+    private Long id;
     private String name;
     private String email;
     private Role role;
@@ -22,6 +23,7 @@ public class UserResponseDTO {
 
     public static UserResponseDTO from(User user){
         return UserResponseDTO.builder()
+                .id(user.getId())
                 .email(user.getEmail())
                 .name(user.getName())
                 .companyId(user.getCompany().getId())

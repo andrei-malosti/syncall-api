@@ -1,7 +1,7 @@
 package com.syncall.api.infra.security;
 
-import com.nimbusds.jose.proc.SecurityContext;
 import com.syncall.api.infra.multitenancy.CompanyContext;
+import com.syncall.api.infra.multitenancy.UserContext;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-public class CompanyTenantFilter extends OncePerRequestFilter {
+public class GetIdFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -27,12 +27,15 @@ public class CompanyTenantFilter extends OncePerRequestFilter {
         if(authentication != null && authentication.getPrincipal() instanceof Jwt jwt){
             String companyId = jwt.getClaimAsString("companyId");
             CompanyContext.setCompanyId(Long.valueOf(companyId));
+            String userId = jwt.getClaimAsString("userId");
+            UserContext.setUserId(Long.valueOf(userId));
         }
 
         try{
             filterChain.doFilter(request, response);
         } finally {
             CompanyContext.clear();
+            UserContext.clear();
         }
     }
 }

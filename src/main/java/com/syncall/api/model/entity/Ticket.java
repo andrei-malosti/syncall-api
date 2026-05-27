@@ -10,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -38,6 +39,15 @@ public class Ticket {
     @JoinTable(name = "ticket_user",
             joinColumns = @JoinColumn(name = "ticket_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private ArrayList<User> users = new ArrayList<>();
+    @Builder.Default
+    private List<User> users = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Company company;
+
+    public void addUser(User user){
+        this.users.add(user);
+        user.getTickets().add(this);
+    }
 }
