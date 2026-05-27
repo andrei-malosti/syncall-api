@@ -4,6 +4,8 @@ import com.syncall.api.dto.user.UserRegisterRequestDTO;
 import com.syncall.api.dto.user.UserResponseDTO;
 import com.syncall.api.exception.BusinessException;
 import com.syncall.api.exception.ResourceNotFoundException;
+import com.syncall.api.infra.multitenancy.CompanyContext;
+import com.syncall.api.model.AttendantStatus;
 import com.syncall.api.model.Role;
 import com.syncall.api.model.entity.Company;
 import com.syncall.api.model.entity.User;
@@ -11,6 +13,8 @@ import com.syncall.api.repository.CompanyRepository;
 import com.syncall.api.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -35,12 +39,55 @@ public class UserService {
         return UserResponseDTO.from(userRepository.save((attendant)));
     }
 
+    public Slice<UserResponseDTO> findAllAttendants(Pageable pageable, Long companyId){
+        return userRepository.findAllAttendants(pageable, companyId)
+                .map(UserResponseDTO::from);
+    }
+
+    public UserResponseDTO findAttendant(Long attendantId, Long companyId){
+        var user = userRepository.findAttendantById(attendantId, companyId).orElseThrow(() -> new ResourceNotFoundException("Atendente não encontrado"));
+        return UserResponseDTO.from(user);
+    }
+
+    public UserResponseDTO createClient(UserRegisterRequestDTO register, Long companyId){
+        if(userRepository.existsByEmail(register.getEmail()))
+            throw new BusinessException("Email já em uso");
+
+        if(!companyRepository.existsById(companyId))
+            throw new BusinessException("Empresa não encontrada");
+
+        var client = buildClient(register, companyRepository.getReferenceById(companyId));
+        return UserResponseDTO.from(userRepository.save(client));
+    }
+
+    public Slice<UserResponseDTO> findAllClients(Pageable pageable, Long companyId){
+        return userRepository.findAllClients(pageable, companyId)
+                .map(UserResponseDTO::from);
+    }
+
+    public UserResponseDTO findClient(Long clientId){
+        var user = userRepository.findClientById(clientId, CompanyContext.getCompanyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
+        return UserResponseDTO.from(user);
+    }
+
     private User buildAttendant(UserRegisterRequestDTO register, Company company){
         return User.builder()
                 .name(register.getName())
                 .email(register.getEmail())
                 .password(passwordEncoder.encode(register.getPassword()))
                 .role(Role.ATTENDANT)
+                .company(company)
+                .availabilityStatus(AttendantStatus.AVAILABLE)
+                .build();
+    }
+
+    private User buildClient(UserRegisterRequestDTO register, Company company){
+        return User.builder()
+                .name(register.getName())
+                .email(register.getEmail())
+                .password(passwordEncoder.encode(register.getPassword()))
+                .role(Role.CLIENT)
                 .company(company)
                 .build();
     }

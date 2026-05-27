@@ -5,6 +5,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -30,16 +31,23 @@ public class SecurityConfig {
     private String secretKey;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, CompanyTenantFilter companyTenantFilter) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, GetIdFilter getIdFilter) throws Exception{
         return http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->  session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/**").permitAll()
-                        .requestMatchers("/attendant/register").hasRole("ROLE_MANAGER")
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/attendants").hasAuthority("SCOPE_MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/clients").hasAuthority("SCOPE_MANAGER")
+                        .requestMatchers(HttpMethod.GET,"/tickets").hasAnyAuthority("SCOPE_ATTENDANT", "SCOPE_MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/tickets").hasAuthority("SCOPE_CLIENT")
+                        .requestMatchers(HttpMethod.PATCH, "/tickets/*").hasAnyAuthority("SCOPE_ATTENDANT", "SCOPE_MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/tickets/client").hasAuthority("SCOPE_CLIENT")
+                        .requestMatchers(HttpMethod.GET, "/tickets/attendant").hasAnyAuthority("SCOPE_ATTENDANT", "SCOPE_MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/tickets/*").hasAnyAuthority("SCOPE_ATTENDANT", "SCOPE_MANAGER")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-                .addFilterAfter(companyTenantFilter, BearerTokenAuthenticationFilter.class)
+                .addFilterAfter(getIdFilter, BearerTokenAuthenticationFilter.class)
                 .build();
     }
 

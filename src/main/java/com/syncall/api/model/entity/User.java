@@ -1,5 +1,6 @@
 package com.syncall.api.model.entity;
 
+import com.syncall.api.model.AttendantStatus;
 import com.syncall.api.model.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,6 +30,9 @@ public class User {
 	
 	@Column(nullable = false)
 	private String name;
+
+	@Enumerated(EnumType.STRING)
+	private AttendantStatus availabilityStatus;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)

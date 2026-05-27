@@ -14,26 +14,26 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/attendants")
-public class AttendantController {
+@RequestMapping("/clients")
+public class ClientController {
 
     private final UserService userService;
 
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody UserRegisterRequestDTO registerRequest){
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createAttendant(registerRequest, CompanyContext.getCompanyId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createClient(registerRequest, CompanyContext.getCompanyId()));
     }
 
     @GetMapping
-    public ResponseEntity<?> findAllAtendants(
-            @PageableDefault(page = 0, size = 20, sort = "name", direction = Sort.Direction.ASC)
+    public ResponseEntity<?> findAllClients(
+            @PageableDefault(page = 0, size = 20 , sort = "name", direction = Sort.Direction.ASC)
             Pageable pageable){
-        return ResponseEntity.ok(userService.findAllAttendants(pageable, CompanyContext.getCompanyId()));
+                return ResponseEntity.ok(userService.findAllClients(pageable, CompanyContext.getCompanyId()));
     }
 
-    @GetMapping("/{attendantId}")
-    public ResponseEntity<?> findAttendantById(@PathVariable Long attendantId){
-        return ResponseEntity.ok(userService.findAttendant(attendantId, CompanyContext.getCompanyId()));
+    @GetMapping("/{clientId}")
+    public ResponseEntity<?> findClient(@PathVariable Long clientId){
+                return ResponseEntity.ok(userService.findClient(clientId));
     }
 
 }
