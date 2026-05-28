@@ -26,6 +26,7 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
+    private final ChatService chatService;
 
     @Transactional
     public TicketResponseDTO create(TicketRegisterRequestDTO register, Long clientId, Long companyId){
@@ -51,6 +52,9 @@ public class TicketService {
 
         var ticket = ticketRepository.findByIdAndCompanyId(ticketId, companyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chamado não encontrado"));
+        var company = companyRepository.getReferenceById(companyId);
+
+        chatService.buildAndSaveChat(ticket, company);
 
         ticket.addUser(attendant);
         return TicketResponseDTO.from(ticket);

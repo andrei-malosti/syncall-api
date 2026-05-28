@@ -32,4 +32,7 @@ public class Message {
     @ManyToOne(fetch = FetchType.LAZY)
     private Chat chat;
 
+    @ManyToOne
+    private Company company;
+
 }
