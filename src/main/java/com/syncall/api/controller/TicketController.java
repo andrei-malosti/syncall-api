@@ -25,9 +25,14 @@ public class TicketController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ticketService.create(registerRequest, UserContext.getUserId(), CompanyContext.getCompanyId()));
     }
 
-    @PatchMapping("/{ticketId}")
+    @PatchMapping("/{ticketId}/assign")
     public ResponseEntity<?> assignTicket(@PathVariable Long ticketId){
         return ResponseEntity.ok(ticketService.assignAttendantToTicket(ticketId, UserContext.getUserId(), CompanyContext.getCompanyId()));
+    }
+
+    @PatchMapping("/conclude")
+    public ResponseEntity<?> concludeTicket(){
+        return ResponseEntity.ok(ticketService.concludeTicket(UserContext.getUserId(), CompanyContext.getCompanyId()));
     }
 
     @GetMapping

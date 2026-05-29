@@ -27,6 +27,7 @@ public class TicketService {
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final ChatService chatService;
+    private final ReportService reportService;
 
     @Transactional
     public TicketResponseDTO create(TicketRegisterRequestDTO register, Long clientId, Long companyId){
@@ -57,6 +58,17 @@ public class TicketService {
         chatService.buildAndSaveChat(ticket, company);
 
         ticket.addUser(attendant);
+        return TicketResponseDTO.from(ticket);
+    }
+
+    @Transactional
+    public TicketResponseDTO concludeTicket(Long clientId, Long companyId){
+        var ticket = ticketRepository.findClientTicket(clientId, companyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Chamado não encontrado ou inexistente"));
+        ticket.setStatus(TicketStatus.CONCLUDED);
+        ticket.setConcludedAt(LocalDateTime.now());
+        var company = companyRepository.getReferenceById(companyId);
+        reportService.buildAndSaveReport(ticket, company);
         return TicketResponseDTO.from(ticket);
     }
 

@@ -20,8 +20,12 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -33,6 +37,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, GetIdFilter getIdFilter) throws Exception{
         return http
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->  session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
@@ -41,10 +46,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/clients").hasAuthority("SCOPE_MANAGER")
                         .requestMatchers(HttpMethod.GET,"/tickets").hasAnyAuthority("SCOPE_ATTENDANT", "SCOPE_MANAGER")
                         .requestMatchers(HttpMethod.POST, "/tickets").hasAuthority("SCOPE_CLIENT")
-                        .requestMatchers(HttpMethod.PATCH, "/tickets/*").hasAnyAuthority("SCOPE_ATTENDANT", "SCOPE_MANAGER")
+                        .requestMatchers(HttpMethod.PATCH, "/tickets/*/assign").hasAnyAuthority("SCOPE_ATTENDANT", "SCOPE_MANAGER")
                         .requestMatchers(HttpMethod.GET, "/tickets/client").hasAuthority("SCOPE_CLIENT")
+                        .requestMatchers(HttpMethod.PATCH, "/tickets/conclude").hasAuthority("SCOPE_CLIENT")
                         .requestMatchers(HttpMethod.GET, "/tickets/attendant").hasAnyAuthority("SCOPE_ATTENDANT", "SCOPE_MANAGER")
                         .requestMatchers(HttpMethod.GET, "/tickets/*").hasAnyAuthority("SCOPE_ATTENDANT", "SCOPE_MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/reports").hasAuthority("SCOPE_MANAGER")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .addFilterAfter(getIdFilter, BearerTokenAuthenticationFilter.class)
@@ -72,5 +79,17 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AuthRegisterRequestDTO {
 
-    @Email
+    @Email(message = "Deve ser um email valido")
     @NotBlank(message = "Email do usuario é obrigatorio")
     private String email;
 
