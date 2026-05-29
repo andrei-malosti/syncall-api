@@ -1,18 +1,13 @@
 package com.syncall.api.model.entity;
 
-import java.time.LocalDateTime;
-
-import org.hibernate.annotations.CreationTimestamp;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -27,9 +22,11 @@ public class Report {
 	
 	@CreationTimestamp
 	private LocalDateTime createdAt;
-	
-	@Column(nullable = false)
-	private String description;
-	
+
+	@OneToOne
+	private Ticket ticket;
+
+	@ManyToOne
+	private Company company;
 
 }

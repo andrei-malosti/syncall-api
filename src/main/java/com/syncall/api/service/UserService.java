@@ -6,6 +6,7 @@ import com.syncall.api.exception.BusinessException;
 import com.syncall.api.exception.ResourceNotFoundException;
 import com.syncall.api.infra.multitenancy.CompanyContext;
 import com.syncall.api.model.AttendantStatus;
+import com.syncall.api.model.PasswordGenerator;
 import com.syncall.api.model.Role;
 import com.syncall.api.model.entity.Company;
 import com.syncall.api.model.entity.User;
@@ -25,6 +26,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Transactional
     public UserResponseDTO createAttendant(UserRegisterRequestDTO register, Long companyId){
@@ -34,9 +36,13 @@ public class UserService {
         if(!companyRepository.existsById(companyId))
             throw new ResourceNotFoundException("Empresa não encontrada");
 
-        var attendant = buildAttendant(register, companyRepository.getReferenceById(companyId));
+        var randomPassword = PasswordGenerator.generate(8);
 
-        return UserResponseDTO.from(userRepository.save((attendant)));
+        var attendant = buildAttendant(register, companyRepository.getReferenceById(companyId), randomPassword);
+        attendant = userRepository.save(attendant);
+        emailService.sendFirstTimeEmail(attendant.getName(), attendant.getEmail(), randomPassword);
+
+        return UserResponseDTO.from(attendant);
     }
 
     public Slice<UserResponseDTO> findAllAttendants(Pageable pageable, Long companyId){
@@ -56,8 +62,13 @@ public class UserService {
         if(!companyRepository.existsById(companyId))
             throw new BusinessException("Empresa não encontrada");
 
-        var client = buildClient(register, companyRepository.getReferenceById(companyId));
-        return UserResponseDTO.from(userRepository.save(client));
+        var randomPassword = PasswordGenerator.generate(8);
+
+        var client = buildClient(register, companyRepository.getReferenceById(companyId), randomPassword);
+        client = userRepository.save(client);
+        emailService.sendFirstTimeEmail(client.getName(), client.getEmail(), randomPassword);
+
+        return UserResponseDTO.from(client);
     }
 
     public Slice<UserResponseDTO> findAllClients(Pageable pageable, Long companyId){
@@ -71,22 +82,22 @@ public class UserService {
         return UserResponseDTO.from(user);
     }
 
-    private User buildAttendant(UserRegisterRequestDTO register, Company company){
+    private User buildAttendant(UserRegisterRequestDTO register, Company company, String password){
         return User.builder()
                 .name(register.getName())
                 .email(register.getEmail())
-                .password(passwordEncoder.encode(register.getPassword()))
+                .password(passwordEncoder.encode(password))
                 .role(Role.ATTENDANT)
                 .company(company)
                 .availabilityStatus(AttendantStatus.AVAILABLE)
                 .build();
     }
 
-    private User buildClient(UserRegisterRequestDTO register, Company company){
+    private User buildClient(UserRegisterRequestDTO register, Company company, String password){
         return User.builder()
                 .name(register.getName())
                 .email(register.getEmail())
-                .password(passwordEncoder.encode(register.getPassword()))
+                .password(passwordEncoder.encode(password))
                 .role(Role.CLIENT)
                 .company(company)
                 .build();

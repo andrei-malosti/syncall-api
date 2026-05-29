@@ -19,4 +19,7 @@ public class Chat {
 
 	@OneToOne
 	private Ticket ticket;
+
+	@ManyToOne
+	private Company company;
 }

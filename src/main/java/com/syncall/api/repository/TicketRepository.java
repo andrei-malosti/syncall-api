@@ -27,7 +27,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     @Query("SELECT t FROM Ticket t WHERE t.company.id = :companyId AND t.status = 'OPEN'")
     Slice<Ticket> findAllTickets(@Param("companyId") Long companyId, Pageable pageable);
 
-    @Query("SELECT t FROM Ticket t JOIN t.users u WHERE u.id = :clientId AND t.company.id = :companyId AND t.status = 'OPEN'")
+    @Query("SELECT t FROM Ticket t JOIN t.users u WHERE u.id = :clientId AND t.company.id = :companyId AND (t.status = 'OPEN' OR t.status = 'IN_PROGRESS')")
     Optional<Ticket> findClientTicket(@Param("clientId") Long clientId, @Param("companyId") Long companyId);
 
     @Query("SELECT t FROM Ticket t JOIN t.users u WHERE u.id = :attendantId AND t.company.id = :companyId AND t.status = 'IN_PROGRESS'")
