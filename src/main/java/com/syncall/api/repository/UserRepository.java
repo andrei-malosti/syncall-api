@@ -31,12 +31,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "AND u.id = :clientId AND u.company.id = :companyId")
     Optional<User> findClientById(Long clientId, Long companyId);
 
-    @Query("SELECT COUNT(u) FROM User u WHERE (u.role = 'ATTENDANT' OR u.role = 'MANAGER') " +
-            "AND u.availabilityStatus = 'AVAILABLE' " +
-            "AND u.company.id = :companyId")
-    Long countAttendantsAvailable(@Param("companyId") Long companyId);
-
-    @Query("SELECT u FROM User u WHERE u.id = :id AND u.company.id = :companyId")
-    Boolean attendantExist(@Param("id") Long id, @Param("companyId") Long companyId);
-
 }

@@ -65,6 +65,8 @@ public class TicketService {
     public TicketResponseDTO concludeTicket(Long clientId, Long companyId){
         var ticket = ticketRepository.findClientTicket(clientId, companyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Chamado não encontrado ou inexistente"));
+        if(ticket.getStatus() == TicketStatus.OPEN)
+            throw new BusinessException("Não é possivel concluir um chamado que não está em progresso");
         ticket.setStatus(TicketStatus.CONCLUDED);
         ticket.setConcludedAt(LocalDateTime.now());
         var company = companyRepository.getReferenceById(companyId);

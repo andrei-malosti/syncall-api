@@ -5,7 +5,6 @@ import com.syncall.api.dto.user.UserResponseDTO;
 import com.syncall.api.exception.BusinessException;
 import com.syncall.api.exception.ResourceNotFoundException;
 import com.syncall.api.infra.multitenancy.CompanyContext;
-import com.syncall.api.model.AttendantStatus;
 import com.syncall.api.model.PasswordGenerator;
 import com.syncall.api.model.Role;
 import com.syncall.api.model.entity.Company;
@@ -89,7 +88,6 @@ public class UserService {
                 .password(passwordEncoder.encode(password))
                 .role(Role.ATTENDANT)
                 .company(company)
-                .availabilityStatus(AttendantStatus.AVAILABLE)
                 .build();
     }
 

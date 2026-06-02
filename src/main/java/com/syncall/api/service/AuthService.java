@@ -7,7 +7,6 @@ import com.syncall.api.dto.company.CompanyRequestDTO;
 import com.syncall.api.exception.BusinessException;
 import com.syncall.api.infra.security.TokenService;
 import com.syncall.api.infra.security.userdetails.CustomUserDetails;
-import com.syncall.api.model.AttendantStatus;
 import com.syncall.api.model.Role;
 import com.syncall.api.model.entity.Company;
 import com.syncall.api.model.entity.User;
@@ -81,7 +80,6 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.MANAGER)
                 .company(company)
-                .availabilityStatus(AttendantStatus.AVAILABLE)
                 .build();
     }
 

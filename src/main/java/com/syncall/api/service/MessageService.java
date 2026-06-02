@@ -31,8 +31,6 @@ public class MessageService {
     // ver o que fazer em relação a proteção das mensagens quanto a usuarios de mesma empresa tentando criar mensagens no chat de um chamado que não é dele
     @Transactional
     public MessageResponseDTO create(MessageRegisterRequestDTO register, Long chatId, Long companyId, Long userId){
-        System.out.println(chatId);
-        System.out.println(companyId);
         if(!chatRepository.existsByIdAndCompanyId(chatId, companyId))
             throw new BusinessException("Chat não encontrado, sua mensagem não foi enviada");
 

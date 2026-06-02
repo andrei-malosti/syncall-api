@@ -15,7 +15,7 @@ public class AuthLoginRequestDTO {
     @NotBlank(message = "Email é obrigatorio")
     private String email;
 
-    @NotBlank(message = "Email é obrigatorio")
+    @NotBlank(message = "Senha é obrigatoria")
     private String password;
 
 }
